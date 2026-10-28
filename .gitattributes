@@ -1,0 +1,8 @@
+# 统一用 LF，别让 Windows 提交被人 clone 时换行错乱
+* text=auto eol=lf
+
+# 二进制资源
+*.svg binary
+*.png binary
+*.ico binary
+*.zip binary

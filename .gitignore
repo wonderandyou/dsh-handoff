@@ -1,0 +1,12 @@
+# 依赖（本插件零依赖，留着防万一）
+node_modules/
+
+# 日志 / 临时产物
+*.log
+_tmp/
+_publish*/
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
+desktop.ini

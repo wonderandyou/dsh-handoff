@@ -1,0 +1,6 @@
+{
+  "plugin.handoff": {
+    "title": "Handoff",
+    "description": "One handoff document per workspace: a short summary is written when a session ends and read back when a new session opens in the same workspace."
+  }
+}

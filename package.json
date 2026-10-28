@@ -1,0 +1,49 @@
+{
+  "name": "dsh-handoff",
+  "version": "0.1.0",
+  "private": true,
+  "description": "让每个工作区共用一份交接文档：会话结束时自动写一条「做了什么 / 结果 / 下次接手」，新会话一打开自动读回来。纯插件实现，不依赖任何外部程序。",
+  "meta": {
+    "title": "交接",
+    "description": "每个工作区一份交接文档：会话结束自动写入简短摘要，同一工作区开新会话自动读回。"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": ["slots"],
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "files": [
+    "lib",
+    "locale/*.json",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "handoff",
+    "workspace"
+  ],
+  "author": "@奇迹与你",
+  "license": "MIT"
+}
