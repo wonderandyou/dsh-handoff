@@ -5,6 +5,7 @@
 # 可调项（都能省略，省略即用默认）：
 #   enabled          总开关。false 等于本插件不存在
 #   injectOrder      交接文档在运行时上下文里的排序，越大越靠后（紧贴消息尾部）
+#   injectOnce       每个会话是否只注入一次。true = 只在开局给一次，之后不再占上下文
 #   injectEntries    新会话自动读回的条目数
 #   injectChars      自动读回文本的字符预算（约 3.2 字符 ≈ 1 token）
 #   maxEntries       每个工作区最多保留多少条交接记录
@@ -20,8 +21,10 @@
       config:
         enabled: true
         injectOrder: 320
-        injectEntries: 3
-        injectChars: 1200
+        # ★ 只在会话开头注入一次，所以可以给足细节（10000 字符 ≈ 3100 token，一次成本）
+        injectOnce: true
+        injectEntries: 20
+        injectChars: 10000
         maxEntries: 40
         autoWrite: true
         minGapMs: 90000

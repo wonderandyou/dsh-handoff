@@ -1,4 +1,4 @@
-/**
+﻿/**
  * _selftest.mjs —— 不启动 DSH 也能验的整条链路
  * ============================================================================
  * 用假 ctx 把真实插件跑一遍：事件进来 → 总结 → 写文档 → 新会话注入 → 工具/面板读回。
@@ -298,6 +298,7 @@ ok(injected.includes('工作区：插件'), '注入文本标明是哪个工作�
 const selfSessionInject = harness.reg.contexts[0]
 ok(docB.entries[0]?.sessionId === 'sess-1', '当前会话是 sess-1（自检前提）')
 ok(selfSessionInject.text() === '', '同一个会话续聊时不会把自己那条注入回去', selfSessionInject.text().slice(0, 60))
+ok(injectDef.text() === '', '同一个会话第二次问要交接文本 → 返回空（只注入一次，不重复占上下文）')
 
 // 6) 另一个工作区互不串（wsC 已在上面建好并登记进账本）
 harness.sessions.set('sess-3', fakeSession('sess-3', wsC))
@@ -431,7 +432,7 @@ ok(!fs.existsSync(path.join(tmpRoot, 'home3')), 'enabled=false 时连目录都�
 
 // 4) 配置钳制
 const cfg = resolveConfig({ injectEntries: 999, debounceMs: 1, minGapMs: -5, maxEntries: 0 })
-ok(cfg.injectEntries === 12, 'injectEntries 被钳到 12', String(cfg.injectEntries))
+ok(cfg.injectEntries === 60, 'injectEntries 被钳到 60', String(cfg.injectEntries))
 ok(cfg.debounceMs === 1000, 'debounceMs 最少 1 秒', String(cfg.debounceMs))
 ok(cfg.minGapMs === 0, 'minGapMs 不会变负数', String(cfg.minGapMs))
 ok(cfg.maxEntries === 1, 'maxEntries 最少 1', String(cfg.maxEntries))

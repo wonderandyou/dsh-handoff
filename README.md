@@ -15,11 +15,22 @@
 |---|---|
 | 一轮结束（`turn/end`） | 等一个防抖窗口（默认 15 秒），把这一段会话压成一条 `标题 / 做了什么 / 结果 / 下次接手` 写进该工作区的文档 |
 | 会话销毁（`agent/disposed`） | 不等防抖，立刻把没落盘的内容写掉 |
-| 新会话创建（`agent/created`） | 挂一个注入段：读该工作区最近 N 条交接，塞进运行时上下文 |
+| 新会话开头 | 挂一个注入段：读该工作区最近 N 条交接塞进运行时上下文 —— **只注入一次**（见下） |
 | 工具 `handoff` | `list` / `read` / `append` / `clear` / `status` / `flush` |
 | 设置页「交接」 | 列出所有工作区（没记录的也列，标「暂无记录」）、切着看条目、清空 |
 
 **同一个会话只占一条记录** —— 越聊越长是「更新」，不是「追加」，否则长会话会把文档刷满。
+
+### ★ 注入只在会话开头来一次
+
+`injectOnce: true`（默认）：这段交接文本**只在该会话的第一次模型请求里出现**，之后每步都返回空。
+理由：`systemPrompt.context` 是每一步都重新组装的，如果每步都塞 1200 字，50 步就等于白付 6 万字符；
+而历史消息里已经保留了那一次的内容，没必要重复。
+
+因为只付一次，预算就可以给足 —— 默认 `injectChars: 10000`（≈3100 token）、`injectEntries: 20`，
+一份 20 条的交接一般能整段塞进去，装不下会自动截断并提示「还有 N 条没列出」。
+
+> 想退回「每步都注入」：`injectOnce: false`，同时把 `injectChars` 调小到 1200 左右。
 
 ## 工作区怎么认
 
@@ -55,8 +66,9 @@
 | `dir` | `""` | 数据目录；空 = `~/.dsh/handoff` |
 | `workspaceFile` | `""` | 工作区账本路径；空 = `~/.dsh/storages/workspace.json`（一般不用改） |
 | `injectOrder` | `320` | 交接段在运行时上下文里的排序 |
-| `injectEntries` | `3` | 新会话读回最近几条 |
-| `injectChars` | `1200` | 读回文本的字符预算（≈375 token） |
+| `injectOnce` | `true` | 每个会话只注入一次（首步），之后返回空、不占上下文 |
+| `injectEntries` | `20` | 新会话最多读回几条 |
+| `injectChars` | `10000` | 读回文本的字符预算（≈3100 token，只付一次） |
 | `maxEntries` | `40` | 每个工作区最多保留几条 |
 | `autoWrite` | `true` | 会话结束是否自动写 |
 | `minGapMs` | `90000` | 两次总结最小间隔（防一路聊一路烧钱） |
@@ -88,11 +100,22 @@ node _backfill.mjs --all     # 连没登记在工作区列表里的目录也补
 ## 自测
 
 ```powershell
-node _selftest.mjs          # host 半边，70 项断言
+node _selftest.mjs          # host 半边，71 项断言
 node _selftest_client.mjs   # 设置页半边，23 项断言
 ```
 
-不启动 DSH 也能跑完整链路（假 ctx + 假 llm + 假账本）：存储、渲染、草稿拼接、JSON 解析、事件 → 总结 → 落盘、新会话注入、工具、面板接口、边界情况。
+不启动 DSH 也能跑完整链路（假 ctx + 假 llm + 假账本）：存储、渲染、草稿拼接、JSON 解析、事件 → 总结 → 落盘、新会话注入、只注入一次、工具、面板接口、边界情况。
+
+## 预览注入效果
+
+想先看看「新会话开头到底会看到什么」，用真实交接数据跑一遍（不启动 DSH、不改任何文档）：
+
+```powershell
+node _preview_inject.mjs                # 当前目录
+node _preview_inject.mjs D:\软件        # 指定工作区
+```
+
+会打印：注入文本长度/估算 token、列出几条、**第二次取文本应为 0 字符**（证明只注入一次），以及全文。
 
 ## 安装
 
@@ -119,6 +142,7 @@ dsh-handoff/
 ├── locale/{zh,en}.json
 ├── _selftest.mjs
 ├── _selftest_client.mjs
+├── _preview_inject.mjs    用真实数据预览「新会话会看到什么」
 └── _backfill.mjs
 ```
 
